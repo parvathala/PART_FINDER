@@ -1,129 +1,291 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Product Part Finder</title>
-  
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Custom CSS -->
-  <link href="style.css" rel="stylesheet">
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <!-- FontAwesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<body class="bg-light">
-  
-  <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm glass-navbar">
-    <div class="container">
-      <a class="navbar-brand fw-bold" href="#">
-        <i class="fas fa-search-location me-2"></i>Part Finder
-      </a>
-      <div id="user-info" class="d-none text-white ms-auto align-items-center">
-        <span id="user-email" class="me-3 small"></span>
-        <button id="logout-btn" class="btn btn-sm btn-outline-light">Logout</button>
-      </div>
-    </div>
-  </nav>
+{% extends "base.html" %}
 
-  <main class="container my-5">
-    
-    <!-- Auth Container -->
-    <div id="auth-container" class="row justify-content-center">
-      <div class="col-md-6 col-lg-5">
-        <div class="card shadow-lg border-0 rounded-4 auth-card">
-          <div class="card-body p-5">
-            <h3 class="text-center mb-4 fw-bold text-dark">Welcome Back</h3>
-            
-            <form id="auth-form">
-              <div class="mb-3">
-                <label class="form-label text-muted">Email address</label>
-                <input type="email" class="form-control form-control-lg bg-light border-0" id="email" required>
-              </div>
-              <div class="mb-4">
-                <label class="form-label text-muted">Password</label>
-                <input type="password" class="form-control form-control-lg bg-light border-0" id="password" required>
-              </div>
-              
-              <button type="submit" id="auth-submit-btn" class="btn btn-primary btn-lg w-100 rounded-pill mb-3 fw-bold shadow-sm fade-hoover">Log In</button>
-              
-              <div class="text-center border-bottom pb-3 mb-3">
-                <a href="#" id="toggle-auth-mode" class="text-decoration-none small text-muted">Need an account? Register</a>
-              </div>
-              
-              <button type="button" id="ms-sso-btn" class="btn btn-outline-dark btn-lg w-100 rounded-pill fs-6 fade-hoover">
-                <i class="fab fa-microsoft me-2 text-primary"></i>Sign in with Microsoft
-              </button>
-            </form>
-            <div id="auth-error" class="text-danger mt-3 small text-center d-none"></div>
-          </div>
-        </div>
-      </div>
-    </div>
+{% block content %}
+<div id="app-container" class="animate-fade-in" style="animation: fadeIn 0.4s ease-out forwards;">
 
-    <!-- App Container -->
-    <div id="app-container" class="d-none animate-fade-in">
-      
-      <div class="row justify-content-center mb-5">
+    <div class="row justify-content-center mb-5">
         <div class="col-md-10 col-lg-8 text-center">
-          <h2 class="fw-bold mb-4 text-dark gradient-text">Find Your Parts</h2>
-          <p class="text-muted mb-4">Search by Product ID (PCS/TRIAD) or Part Number</p>
-          
-          <div class="search-box position-relative shadow-sm rounded-pill bg-white p-2 d-flex align-items-center">
-            <i class="fas fa-search ms-3 text-muted"></i>
-            <input type="text" id="search-input" class="form-control border-0 bg-transparent fs-5 ms-2 shadow-none" placeholder="e.g. TDI1000106 or 56003342" autocomplete="off">
-            <button id="search-btn" class="btn btn-primary rounded-pill px-4 ms-2 fw-semibold fade-hoover">Search</button>
-          </div>
-          <div id="search-error" class="text-danger mt-2 small text-start d-none"></div>
-        </div>
-      </div>
-      
-      <!-- Loading Spinner -->
-      <div id="loading-spinner" class="text-center d-none mb-4">
-        <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Loading...</span>
-        </div>
-      </div>
+            <h2 class="fw-bold mb-4 text-dark gradient-text">Find Your Parts</h2>
+            <p class="text-muted mb-4">Search by Product ID (PCS/TRIAD) or Part Number</p>
 
-      <!-- Results Table -->
-      <div id="results-container" class="card shadow-sm border-0 rounded-4 d-none overflow-hidden">
-        <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
-          <h5 id="results-title" class="fw-bold m-0 text-dark">Search Results</h5>
+            <div class="search-box position-relative shadow-sm rounded-pill bg-white p-2 d-flex align-items-center"
+                style="border: 1px solid #e2e8f0; transition: all 0.3s ease;">
+                <i class="fas fa-search ms-3 text-muted"></i>
+                <input type="text" id="search-input" class="form-control border-0 bg-transparent fs-5 ms-2 shadow-none"
+                    placeholder="e.g. TDI1000106 or 56003342" autocomplete="off" style="outline: none;">
+                <button id="search-btn"
+                    class="btn btn-primary rounded-pill px-4 ms-2 fw-semibold fade-hoover">Search</button>
+            </div>
+            <div id="search-error" class="text-danger mt-2 small text-start d-none"></div>
         </div>
-        <div class="card-body p-0">
-          <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0 custom-table">
-              <thead class="bg-light text-muted small text-uppercase">
-                <tr>
-                  <th class="ps-4">Product ID (PCS)</th>
-                  <th>Product ID (TRIAD)</th>
-                  <th>Distributor Part Num</th>
-                  <th>Alternate Part Num</th>
-                </tr>
-              </thead>
-              <tbody id="results-body">
-                <!-- Data populated here -->
-              </tbody>
-            </table>
-          </div>
+    </div>
+
+    <!-- Two-column layout container -->
+    <div class="row gx-4">
+
+        <!-- Left Column: Search & Results -->
+        <div class="col-lg-7 mb-4">
+            <!-- Loading Spinner -->
+            <div id="loading-spinner" class="text-center d-none mb-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+
+            <!-- Results Table -->
+            <div id="results-container" class="card shadow-sm border-0 rounded-4 d-none overflow-hidden h-100">
+                <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
+                    <h5 id="results-title" class="fw-bold m-0 text-dark">Search Results</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0"
+                            style="border-collapse: separate; border-spacing: 0;">
+                            <thead class="bg-light text-muted small text-uppercase"
+                                style="border-bottom: 2px solid #e2e8f0;">
+                                <tr>
+                                    <th class="ps-4 py-3">Product ID (PCS)</th>
+                                    <th class="py-3">Product ID (TRIAD)</th>
+                                    <th class="py-3">Distributor Part Num</th>
+                                    <th class="py-3">Alternate Part Num</th>
+                                </tr>
+                            </thead>
+                            <tbody id="results-body">
+                                <!-- Data populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- No Results State -->
+            <div id="no-results"
+                class="text-center p-5 d-none bg-white rounded-4 shadow-sm h-100 d-flex flex-column justify-content-center">
+                <div class="display-1 text-muted opacity-25 mb-3">
+                    <i class="fas fa-box-open"></i>
+                </div>
+                <h4 class="text-muted">No results found</h4>
+                <p class="text-muted small">Try adjusting your search criteria.</p>
+            </div>
         </div>
-      </div>
-      
-      <!-- No Results State -->
-      <div id="no-results" class="text-center p-5 d-none bg-white rounded-4 shadow-sm">
-        <div class="display-1 text-muted opacity-25 mb-3">
-          <i class="fas fa-box-open"></i>
+
+        <!-- Right Column: AI Chatbot -->
+        <div class="col-lg-5 mb-4">
+            <div class="card shadow-sm border-0 rounded-4 h-100 d-flex flex-column"
+                style="min-height: 400px; max-height: 600px;">
+                <!-- Chat Header -->
+                <div class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex align-items-center gap-3">
+                    <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center text-white p-2"
+                        style="width: 40px; height: 40px;">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold m-0 text-dark">AI Parts Assistant</h5>
+                        <small class="text-success"><i class="fas fa-circle me-1"
+                                style="font-size: 8px;"></i>Online</small>
+                    </div>
+                </div>
+
+                <!-- Chat Messages Area -->
+                <div id="chat-messages" class="card-body flex-grow-1 overflow-auto p-4 bg-light"
+                    style="scroll-behavior: smooth;">
+                    <!-- Welcome Message -->
+                    <div class="d-flex mb-3 justify-content-start">
+                        <div class="p-3 rounded-4 shadow-sm bg-white text-dark"
+                            style="max-width: 85%; border-bottom-left-radius: 0;">
+                            Hi! 👋 I'm your AI Parts Assistant. You can ask me questions like <em>"What distributor
+                                parts go with TDI1000106?"</em> or <em>"Do we have any alternates for 56003342?"</em>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Input Area -->
+                <div class="card-footer bg-white border-top p-3">
+                    <div class="input-group bg-light rounded-pill p-1 border">
+                        <input type="text" id="chat-input" class="form-control border-0 bg-transparent shadow-none px-3"
+                            placeholder="Ask a question..." autocomplete="off">
+                        <button class="btn btn-primary rounded-pill px-3" type="button" id="chat-btn">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
-        <h4 class="text-muted">No results found</h4>
-        <p class="text-muted small">Try adjusting your search criteria.</p>
-      </div>
 
     </div>
-  </main>
 
-  <!-- Firebase App (the core Firebase SDK) -->
-  <script type="module" src="app.js"></script>
-</body>
-</html>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const searchInput = document.getElementById('search-input');
+        const searchBtn = document.getElementById('search-btn');
+        const searchErrorDisplay = document.getElementById('search-error');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const resultsContainer = document.getElementById('results-container');
+        const resultsBody = document.getElementById('results-body');
+        const noResultsDiv = document.getElementById('no-results');
+
+        // Chat Elements
+        const chatInput = document.getElementById('chat-input');
+        const chatBtn = document.getElementById('chat-btn');
+        const chatMessages = document.getElementById('chat-messages');
+
+        function showError(message) {
+            searchErrorDisplay.textContent = message;
+            searchErrorDisplay.classList.remove('d-none');
+        }
+
+        function clearError() {
+            searchErrorDisplay.classList.add('d-none');
+        }
+
+        searchBtn.addEventListener('click', performSearch);
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') performSearch();
+        });
+
+        chatBtn.addEventListener('click', sendChatMessage);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendChatMessage();
+        });
+
+        async function performSearch() {
+            const searchTerm = searchInput.value.trim();
+            clearError();
+
+            if (!searchTerm) {
+                showError('Please enter a search term.');
+                return;
+            }
+
+            // Reset UI
+            resultsContainer.classList.add('d-none');
+            noResultsDiv.classList.add('d-none');
+            loadingSpinner.classList.remove('d-none');
+            resultsBody.innerHTML = '';
+
+            try {
+                const response = await fetch(`/api/search?q=${encodeURIComponent(searchTerm)}`);
+
+                if (!response.ok) {
+                    throw new Error(`Server returned ${response.status}`);
+                }
+
+                const results = await response.json();
+
+                loadingSpinner.classList.add('d-none');
+
+                if (results.length === 0) {
+                    noResultsDiv.classList.remove('d-none');
+                } else {
+                    renderResults(results);
+                    resultsContainer.classList.remove('d-none');
+                }
+
+            } catch (error) {
+                console.error("Error searching:", error);
+                loadingSpinner.classList.add('d-none');
+                showError(`Search failed: ${error.message}`);
+            }
+        }
+
+        function renderResults(results) {
+            resultsBody.innerHTML = '';
+            results.forEach(part => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+          <td class="ps-4 py-3 fw-medium text-dark" style="border-bottom: 1px solid #f1f5f9;">${part.product_id_pcs || '-'}</td>
+          <td class="py-3" style="border-bottom: 1px solid #f1f5f9;">${part.product_id_triad || '-'}</td>
+          <td class="py-3" style="border-bottom: 1px solid #f1f5f9;">${part.distributor_part_number || '-'}</td>
+          <td class="py-3" style="border-bottom: 1px solid #f1f5f9;">${part.alternate_part_number || '-'}</td>
+        `;
+                resultsBody.appendChild(tr);
+            });
+        }
+
+        async function sendChatMessage() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+
+            // Clear input
+            chatInput.value = '';
+
+            // Add user message to UI
+            appendMessage('user', text);
+
+            // Add typing indicator
+            const typingId = 'typing-' + Date.now();
+            appendTypingIndicator(typingId);
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: text })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Server returned ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                // Remove typing indicator
+                removeElement(typingId);
+
+                // Add AI response to UI
+                appendMessage('ai', data.reply);
+
+            } catch (error) {
+                console.error("Chat error:", error);
+                removeElement(typingId);
+                appendMessage('ai', "Sorry, I had trouble processing that request.");
+            }
+        }
+
+        function appendMessage(sender, text) {
+            const wrapper = document.createElement('div');
+            wrapper.className = `d-flex mb-3 ${sender === 'user' ? 'justify-content-end' : 'justify-content-start'}`;
+
+            const bubble = document.createElement('div');
+            bubble.className = `p-3 rounded-4 shadow-sm ${sender === 'user' ? 'bg-primary text-white' : 'bg-light text-dark'}`;
+            bubble.style.maxWidth = '85%';
+            bubble.style.borderBottomRightRadius = sender === 'user' ? '0' : '0.5rem';
+            bubble.style.borderBottomLeftRadius = sender === 'ai' ? '0' : '0.5rem';
+            bubble.innerHTML = text;
+
+            wrapper.appendChild(bubble);
+            chatMessages.appendChild(wrapper);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function appendTypingIndicator(id) {
+            const wrapper = document.createElement('div');
+            wrapper.id = id;
+            wrapper.className = 'd-flex mb-3 justify-content-start';
+
+            const bubble = document.createElement('div');
+            bubble.className = 'p-3 rounded-4 shadow-sm bg-light text-muted d-flex align-items-center gap-1';
+            bubble.style.borderBottomLeftRadius = '0';
+
+            bubble.innerHTML = `
+                <span class="spinner-grow spinner-grow-sm" style="width: 0.5rem; height: 0.5rem;" role="status"></span>
+                <span class="spinner-grow spinner-grow-sm" style="width: 0.5rem; height: 0.5rem; animation-delay: 0.2s" role="status"></span>
+                <span class="spinner-grow spinner-grow-sm" style="width: 0.5rem; height: 0.5rem; animation-delay: 0.4s" role="status"></span>
+            `;
+
+            wrapper.appendChild(bubble);
+            chatMessages.appendChild(wrapper);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function removeElement(id) {
+            const el = document.getElementById(id);
+            if (el) el.remove();
+        }
+    });
+</script>
+{% endblock %}
