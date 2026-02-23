@@ -54,3 +54,34 @@ If you wish to test it locally before deploying to Render:
    ```
 3. **Access the application:**
    Open a web browser and go to `http://127.0.0.1:5000`
+
+---
+
+## 🤖 AI Parts Assistant (Built-in Chatbot)
+
+This application includes a fully functional, AI-powered Chatbot directly on the search page! 
+
+### 1. Prerequisites
+- **OpenAI API Key**: The chatbot uses OpenAI to process natural language.
+
+### 2. How to Enable the Chatbot
+To power the chatbot's "brain", you just need to set your OpenAI key as an environment variable before starting the server.
+
+**In your terminal (VS Code):**
+```bash
+# On Windows PowerShell
+$env:OPENAI_API_KEY="your-api-key-here"
+
+# On Mac/Linux
+export OPENAI_API_KEY="your-api-key-here"
+```
+
+Once the key is set, run `flask run` again. When you log into the application, you will see the **AI Parts Assistant** panel on the right side of the screen.
+
+### 3. Usage
+You can ask the assistant natural language questions instead of using the strict search bar:
+* *"What parts are compatible with TDI1000106?"*
+* *"A customer needs an alternate for part 56003342, do we have any?"*
+* *"I found distributor number 987654, what Product ID is that for?"*
+
+The AI will intelligently search the `PARTS_DATA.csv` and formulate a conversational reply!

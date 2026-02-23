@@ -2,3 +2,6 @@ flask
 pandas
 werkzeug
 gunicorn
+openai
+python-dotenv
+markdown

@@ -20,45 +20,98 @@
         </div>
     </div>
 
-    <!-- Loading Spinner -->
-    <div id="loading-spinner" class="text-center d-none mb-4">
-        <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
-        </div>
-    </div>
+    <!-- Two-column layout container -->
+    <div class="row gx-4">
 
-    <!-- Results Table -->
-    <div id="results-container" class="card shadow-sm border-0 rounded-4 d-none overflow-hidden">
-        <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
-            <h5 id="results-title" class="fw-bold m-0 text-dark">Search Results</h5>
-        </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0"
-                    style="border-collapse: separate; border-spacing: 0;">
-                    <thead class="bg-light text-muted small text-uppercase" style="border-bottom: 2px solid #e2e8f0;">
-                        <tr>
-                            <th class="ps-4 py-3">Product ID (PCS)</th>
-                            <th class="py-3">Product ID (TRIAD)</th>
-                            <th class="py-3">Distributor Part Num</th>
-                            <th class="py-3">Alternate Part Num</th>
-                        </tr>
-                    </thead>
-                    <tbody id="results-body">
-                        <!-- Data populated here -->
-                    </tbody>
-                </table>
+        <!-- Left Column: Search & Results -->
+        <div class="col-lg-7 mb-4">
+            <!-- Loading Spinner -->
+            <div id="loading-spinner" class="text-center d-none mb-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+
+            <!-- Results Table -->
+            <div id="results-container" class="card shadow-sm border-0 rounded-4 d-none overflow-hidden h-100">
+                <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
+                    <h5 id="results-title" class="fw-bold m-0 text-dark">Search Results</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0"
+                            style="border-collapse: separate; border-spacing: 0;">
+                            <thead class="bg-light text-muted small text-uppercase"
+                                style="border-bottom: 2px solid #e2e8f0;">
+                                <tr>
+                                    <th class="ps-4 py-3">Product ID (PCS)</th>
+                                    <th class="py-3">Product ID (TRIAD)</th>
+                                    <th class="py-3">Distributor Part Num</th>
+                                    <th class="py-3">Alternate Part Num</th>
+                                </tr>
+                            </thead>
+                            <tbody id="results-body">
+                                <!-- Data populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- No Results State -->
+            <div id="no-results"
+                class="text-center p-5 d-none bg-white rounded-4 shadow-sm h-100 d-flex flex-column justify-content-center">
+                <div class="display-1 text-muted opacity-25 mb-3">
+                    <i class="fas fa-box-open"></i>
+                </div>
+                <h4 class="text-muted">No results found</h4>
+                <p class="text-muted small">Try adjusting your search criteria.</p>
             </div>
         </div>
-    </div>
 
-    <!-- No Results State -->
-    <div id="no-results" class="text-center p-5 d-none bg-white rounded-4 shadow-sm">
-        <div class="display-1 text-muted opacity-25 mb-3">
-            <i class="fas fa-box-open"></i>
+        <!-- Right Column: AI Chatbot -->
+        <div class="col-lg-5 mb-4">
+            <div class="card shadow-sm border-0 rounded-4 h-100 d-flex flex-column"
+                style="min-height: 400px; max-height: 600px;">
+                <!-- Chat Header -->
+                <div class="card-header bg-white border-bottom pt-4 pb-3 px-4 d-flex align-items-center gap-3">
+                    <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center text-white p-2"
+                        style="width: 40px; height: 40px;">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold m-0 text-dark">AI Parts Assistant</h5>
+                        <small class="text-success"><i class="fas fa-circle me-1"
+                                style="font-size: 8px;"></i>Online</small>
+                    </div>
+                </div>
+
+                <!-- Chat Messages Area -->
+                <div id="chat-messages" class="card-body flex-grow-1 overflow-auto p-4 bg-light"
+                    style="scroll-behavior: smooth;">
+                    <!-- Welcome Message -->
+                    <div class="d-flex mb-3 justify-content-start">
+                        <div class="p-3 rounded-4 shadow-sm bg-white text-dark"
+                            style="max-width: 85%; border-bottom-left-radius: 0;">
+                            Hi! 👋 I'm your AI Parts Assistant. You can ask me questions like <em>"What distributor
+                                parts go with TDI1000106?"</em> or <em>"Do we have any alternates for 56003342?"</em>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Input Area -->
+                <div class="card-footer bg-white border-top p-3">
+                    <div class="input-group bg-light rounded-pill p-1 border">
+                        <input type="text" id="chat-input" class="form-control border-0 bg-transparent shadow-none px-3"
+                            placeholder="Ask a question..." autocomplete="off">
+                        <button class="btn btn-primary rounded-pill px-3" type="button" id="chat-btn">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
-        <h4 class="text-muted">No results found</h4>
-        <p class="text-muted small">Try adjusting your search criteria.</p>
+
     </div>
 
 </div>
@@ -75,6 +128,11 @@
         const resultsBody = document.getElementById('results-body');
         const noResultsDiv = document.getElementById('no-results');
 
+        // Chat Elements
+        const chatInput = document.getElementById('chat-input');
+        const chatBtn = document.getElementById('chat-btn');
+        const chatMessages = document.getElementById('chat-messages');
+
         function showError(message) {
             searchErrorDisplay.textContent = message;
             searchErrorDisplay.classList.remove('d-none');
@@ -87,6 +145,11 @@
         searchBtn.addEventListener('click', performSearch);
         searchInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') performSearch();
+        });
+
+        chatBtn.addEventListener('click', sendChatMessage);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendChatMessage();
         });
 
         async function performSearch() {
@@ -141,6 +204,87 @@
         `;
                 resultsBody.appendChild(tr);
             });
+        }
+
+        async function sendChatMessage() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+
+            // Clear input
+            chatInput.value = '';
+
+            // Add user message to UI
+            appendMessage('user', text);
+
+            // Add typing indicator
+            const typingId = 'typing-' + Date.now();
+            appendTypingIndicator(typingId);
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: text })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Server returned ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                // Remove typing indicator
+                removeElement(typingId);
+
+                // Add AI response to UI
+                appendMessage('ai', data.reply);
+
+            } catch (error) {
+                console.error("Chat error:", error);
+                removeElement(typingId);
+                appendMessage('ai', "Sorry, I had trouble processing that request.");
+            }
+        }
+
+        function appendMessage(sender, text) {
+            const wrapper = document.createElement('div');
+            wrapper.className = `d-flex mb-3 ${sender === 'user' ? 'justify-content-end' : 'justify-content-start'}`;
+
+            const bubble = document.createElement('div');
+            bubble.className = `p-3 rounded-4 shadow-sm ${sender === 'user' ? 'bg-primary text-white' : 'bg-light text-dark'}`;
+            bubble.style.maxWidth = '85%';
+            bubble.style.borderBottomRightRadius = sender === 'user' ? '0' : '0.5rem';
+            bubble.style.borderBottomLeftRadius = sender === 'ai' ? '0' : '0.5rem';
+            bubble.innerHTML = text;
+
+            wrapper.appendChild(bubble);
+            chatMessages.appendChild(wrapper);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function appendTypingIndicator(id) {
+            const wrapper = document.createElement('div');
+            wrapper.id = id;
+            wrapper.className = 'd-flex mb-3 justify-content-start';
+
+            const bubble = document.createElement('div');
+            bubble.className = 'p-3 rounded-4 shadow-sm bg-light text-muted d-flex align-items-center gap-1';
+            bubble.style.borderBottomLeftRadius = '0';
+
+            bubble.innerHTML = `
+                <span class="spinner-grow spinner-grow-sm" style="width: 0.5rem; height: 0.5rem;" role="status"></span>
+                <span class="spinner-grow spinner-grow-sm" style="width: 0.5rem; height: 0.5rem; animation-delay: 0.2s" role="status"></span>
+                <span class="spinner-grow spinner-grow-sm" style="width: 0.5rem; height: 0.5rem; animation-delay: 0.4s" role="status"></span>
+            `;
+
+            wrapper.appendChild(bubble);
+            chatMessages.appendChild(wrapper);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function removeElement(id) {
+            const el = document.getElementById(id);
+            if (el) el.remove();
         }
     });
 </script>
