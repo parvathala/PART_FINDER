@@ -94,6 +94,8 @@ def search():
     
     return jsonify(results_dict)
 
+# Call load_data immediately so it executes when gunicorn imports the app
+load_data()
+
 if __name__ == '__main__':
-    load_data()
     app.run(debug=True, host='0.0.0.0')
