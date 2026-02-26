@@ -18,7 +18,7 @@ except Exception as e:
     print(f"Login failed: {e}")
 
 # Search
-search_url = "http://127.0.0.1:5000/api/search?q=TDI1000106"
+search_url = "http://127.0.0.1:5000/api/search?q=1000"
 try:
     req = urllib.request.Request(search_url)
     res = urllib.request.urlopen(req)

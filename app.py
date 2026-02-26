@@ -108,28 +108,33 @@ def search():
         return jsonify({"error": "Database connection not available."}), 500
 
     n1ql_query = f"""
-        SELECT product_id_pcs, product_id_triad, distributor_part_number, alternate_part_number
-        FROM `{cb_bucket_name}` WHERE UPPER(TO_STRING(product_id_pcs)) = $search_term
-        UNION
-        SELECT product_id_pcs, product_id_triad, distributor_part_number, alternate_part_number
-        FROM `{cb_bucket_name}` WHERE UPPER(TO_STRING(product_id_triad)) = $search_term
-        UNION
-        SELECT product_id_pcs, product_id_triad, distributor_part_number, alternate_part_number
-        FROM `{cb_bucket_name}` WHERE UPPER(TO_STRING(distributor_part_number)) = $search_term
-        UNION
-        SELECT product_id_pcs, product_id_triad, distributor_part_number, alternate_part_number
-        FROM `{cb_bucket_name}` WHERE UPPER(TO_STRING(alternate_part_number)) = $search_term
+        SELECT
+            content.legacyNumber as product_id_triad,
+            content.itemDesc,
+            content.itemKey as product_id_pcs,
+            content.distributorPartNumber as distributor_part_number,
+            content.manufacturerPartNumber as alternate_part_number
+        FROM `{cb_bucket_name}`
+        WHERE divisionKey = "1"
+          AND class = "com.pcs.api.productmaintenance.productcatalog.entity.Product"
+          AND (content.legacyNumber LIKE $search_term
+               OR TO_STRING(content.itemKey) LIKE $search_term
+               OR content.distributorPartNumber LIKE $search_term
+               OR content.manufacturerPartNumber LIKE $search_term)
+        LIMIT 100
     """
     try:
+        # Use prefix matching (trailing wildcard only) for performance with B-tree indexes
+        search_param = f"{query}%"
+        
         query_result = cb_cluster.query(
             n1ql_query,
-            QueryOptions(named_parameters={'search_term': query})
+            QueryOptions(named_parameters={'search_term': search_param})
         )
         
-        # We need to collect the results from the query iterable
         results_dict = [row for row in query_result.rows()]
         
-        # Deduplicate results using a set of tuples since multiple docs could match the same logical row
+        # Deduplicate
         unique_results = []
         seen = set()
         for row in results_dict:
@@ -210,25 +215,32 @@ def chat():
                         function_response = json.dumps({"error": "Database connection not available."})
                     else:
                         n1ql_query = f"""
-                            SELECT product_id_pcs, product_id_triad, distributor_part_number, alternate_part_number
-                            FROM `{cb_bucket_name}` WHERE UPPER(TO_STRING(product_id_pcs)) = $search_term
-                            UNION
-                            SELECT product_id_pcs, product_id_triad, distributor_part_number, alternate_part_number
-                            FROM `{cb_bucket_name}` WHERE UPPER(TO_STRING(product_id_triad)) = $search_term
-                            UNION
-                            SELECT product_id_pcs, product_id_triad, distributor_part_number, alternate_part_number
-                            FROM `{cb_bucket_name}` WHERE UPPER(TO_STRING(distributor_part_number)) = $search_term
-                            UNION
-                            SELECT product_id_pcs, product_id_triad, distributor_part_number, alternate_part_number
-                            FROM `{cb_bucket_name}` WHERE UPPER(TO_STRING(alternate_part_number)) = $search_term
+                            SELECT
+                                content.legacyNumber as product_id_triad,
+                                content.itemDesc,
+                                content.itemKey as product_id_pcs,
+                                content.distributorPartNumber as distributor_part_number,
+                                content.manufacturerPartNumber as alternate_part_number
+                            FROM `{cb_bucket_name}`
+                            WHERE divisionKey = "1"
+                              AND class = "com.pcs.api.productmaintenance.productcatalog.entity.Product"
+                              AND (content.legacyNumber LIKE $search_term
+                                   OR TO_STRING(content.itemKey) LIKE $search_term
+                                   OR content.distributorPartNumber LIKE $search_term
+                                   OR content.manufacturerPartNumber LIKE $search_term)
+                            LIMIT 100
                         """
                         try:
+                            # Use prefix matching (trailing wildcard only) for performance with B-tree indexes
+                            search_param = f"{query}%"
+                            
                             query_result = cb_cluster.query(
                                 n1ql_query,
-                                QueryOptions(named_parameters={'search_term': query})
+                                QueryOptions(named_parameters={'search_term': search_param})
                             )
                             results_dict = [row for row in query_result.rows()]
                             
+                            # Deduplicate
                             unique_results = []
                             seen = set()
                             for row in results_dict:
